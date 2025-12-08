@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
-import swaggerSpec from './src/config/swagger.js';
+import swaggerSpec from './Projeto/backend/src/server.js';
 import authRoutes from './src/routes/auth.js';
 import saneamentoRoutes from './src/routes/saneamento.js';
 

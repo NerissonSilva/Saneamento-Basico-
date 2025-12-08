@@ -1,79 +1,88 @@
-# Projeto Full Stack com Login Social
+# Sistema de Saneamento Básico - Recife/PE
 
-Backend (Node.js + Express) e Frontend (HTML/CSS/JS) com autenticação Google OAuth.
+Sistema web para visualização de estatísticas de saneamento básico em Recife, Pernambuco.
 
-## 🚀 Uma Única URL Pública
+## 🚀 Tecnologias
 
-Frontend e backend servidos juntos em **uma única URL** no Render!
+**Backend:**
+- ✅ Node.js + Express
+- ✅ Swagger (documentação API)
+- ✅ Helmet (segurança)
+- ✅ Vitest (testes)
+- ✅ ESLint + Prettier
+- ✅ JWT (autenticação)
+- ✅ Compression (otimização)
 
-## Deploy Rápido no Render
+**Frontend:**
+- ✅ React 18
+- ✅ React Router
+- ✅ Axios
+- ✅ Vite
 
-### Método 1: Deploy Manual (Mais Simples)
+## 📦 Instalação Local
 
-1. **Criar PostgreSQL:**
-   - [Render Dashboard](https://dashboard.render.com/) > New > PostgreSQL
-   - Name: `sessions-db`, Plan: Free
-
-2. **Criar Web Service:**
-   - New > Web Service > Conectar repositório
-   - Build: `cd backend && npm install`
-   - Start: `cd backend && npm start`
-   - Plan: Free
-
-3. **Configurar variáveis** (veja DEPLOY.md)
-
-### Método 2: Blueprint (Automático)
-
-1. Push para GitHub
-2. Render Dashboard > New > Blueprint
-3. Conectar repositório (detecta `render.yaml`)
-
-**Se der erro "No resources managed by YAML":** Use o Método 1 (Manual)
-
-### Configurar Google OAuth
-
-1. [Google Cloud Console](https://console.cloud.google.com/)
-2. Criar projeto > APIs & Services > Credentials
-3. OAuth 2.0 Client ID
-4. Redirect URI: `https://seu-app.onrender.com/api/auth/google/callback`
-
-## 🛠️ Desenvolvimento Local
-
+### Backend
 ```bash
 cd backend
 npm install
-# Configure as variáveis no .env
+npm start
+```
+Servidor: `http://localhost:3000`
+Docs: `http://localhost:3000/api-docs`
+
+### Frontend
+```bash
+cd frontend
+npm install
 npm run dev
 ```
+Frontend: `http://localhost:5173`
 
-Acesse: `http://localhost:3000`
-
-## 📦 Estrutura
-
-```
-├── backend/          # API Node.js (serve o frontend também)
-│   ├── server.js     # Servidor Express
-│   ├── package.json
-│   └── .env
-├── frontend/         # Site estático (servido pelo backend)
-│   ├── index.html
-│   ├── styles.css
-│   └── app.js
-└── render.yaml       # Configuração Render (1 serviço apenas)
+## 🧪 Testes
+```bash
+cd backend
+npm test
 ```
 
-## 🌐 Rotas
+## 🌐 Deploy no Render
 
-- `/` - Frontend (index.html)
-- `/api` - API info
-- `/api/health` - Health check
-- `/api/auth/google` - Login Google
-- `/api/auth/user` - Dados do usuário
-- `/api/auth/logout` - Logout
+1. **Criar repositório no GitHub:**
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/SEU-USUARIO/recife-saneamento.git
+git push -u origin main
+```
 
-## ✅ Compatibilidade
+2. **Configurar no Render:**
+   - Acesse [Render Dashboard](https://dashboard.render.com/)
+   - New + → Blueprint
+   - Conectar repositório
+   - Apply
 
-- ✅ Linux (Ubuntu, Debian, etc)
-- ✅ Render.com
-- ✅ Node.js 18+
-- ✅ Deploy sem falhas
+## 📡 Endpoints da API
+
+**Públicos:**
+- `GET /api` - Info da API
+- `GET /api/health` - Health check
+- `POST /api/auth/register` - Registrar
+- `POST /api/auth/login` - Login
+
+**Protegidos (requer token):**
+- `GET /api/saneamento/estatisticas` - Todas estatísticas
+- `GET /api/saneamento/agua` - Dados de água
+- `GET /api/saneamento/esgoto` - Dados de esgoto
+- `GET /api/saneamento/residuos` - Dados de resíduos
+
+## 📊 Dados
+
+Baseados no SNIS 2022 para Recife/PE:
+- População: 1.653.461 habitantes
+- Atendimento de água: 89,5%
+- Coleta de esgoto: 68,4%
+- Coleta de resíduos: 98,7%
+
+## 📄 Licença
+
+MIT
