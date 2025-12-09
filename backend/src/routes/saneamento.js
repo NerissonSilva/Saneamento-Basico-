@@ -1,114 +1,100 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
-const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Token não fornecido' });
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Token inválido' });
-  }
-};
-
-// Dados reais de Recife/PE baseados no SNIS 2022
-const dadosRecife = {
-  cidade: 'Recife',
-  estado: 'Pernambuco',
-  populacao: 1653461,
-  ano: 2022,
-  agua: {
-    atendimento: 89.5,
-    perdas: 42.3,
-    consumoMedio: 142.8,
-    ligacoes: 485320,
-  },
-  esgoto: {
-    coleta: 68.4,
-    tratamento: 35.2,
-    ligacoes: 312450,
-  },
-  residuos: {
-    coleta: 98.7,
-    coletaSeletiva: 12.3,
-    toneladas: 1850,
-  },
-  investimentos: {
-    total: 125.4,
-    agua: 68.2,
-    esgoto: 45.8,
-    residuos: 11.4,
-  },
+// Mock data - dados de exemplo de saneamento
+const dadosSaneamento = {
+    recife: {
+        populacao: 1653461,
+        abastecimentoAgua: {
+            cobertura: 89.5,
+            tratamento: 95.2,
+            perdas: 45.3
+        },
+        esgotamento: {
+            cobertura: 68.7,
+            tratamento: 35.4,
+            redesColetoras: 1250
+        },
+        residuosSolidos: {
+            coleta: 98.5,
+            reciclagem: 12.3,
+            destinacaoAdequada: 85.7
+        },
+        ultimaAtualizacao: '2024-01-15'
+    }
 };
 
 /**
  * @swagger
  * /api/saneamento/estatisticas:
  *   get:
- *     summary: Estatísticas gerais de Recife
+ *     summary: Obter estatísticas gerais de saneamento
  *     tags: [Saneamento]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Dados de saneamento
+ *         description: Estatísticas de saneamento
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
  */
-router.get('/estatisticas', authMiddleware, (_req, res) => {
-  res.json(dadosRecife);
+router.get('/estatisticas', (req, res) => {
+    res.json({
+        success: true,
+        data: dadosSaneamento.recife
+    });
 });
 
 /**
  * @swagger
  * /api/saneamento/agua:
  *   get:
- *     summary: Dados de abastecimento de água
+ *     summary: Obter dados de abastecimento de água
  *     tags: [Saneamento]
- *     security:
- *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados de abastecimento de água
  */
-router.get('/agua', authMiddleware, (_req, res) => {
-  res.json({
-    cidade: 'Recife',
-    indicador: 'Abastecimento de Água',
-    dados: dadosRecife.agua,
-  });
+router.get('/agua', (req, res) => {
+    res.json({
+        success: true,
+        data: dadosSaneamento.recife.abastecimentoAgua
+    });
 });
 
 /**
  * @swagger
  * /api/saneamento/esgoto:
  *   get:
- *     summary: Dados de esgotamento sanitário
+ *     summary: Obter dados de esgotamento sanitário
  *     tags: [Saneamento]
- *     security:
- *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados de esgotamento sanitário
  */
-router.get('/esgoto', authMiddleware, (_req, res) => {
-  res.json({
-    cidade: 'Recife',
-    indicador: 'Esgotamento Sanitário',
-    dados: dadosRecife.esgoto,
-  });
+router.get('/esgoto', (req, res) => {
+    res.json({
+        success: true,
+        data: dadosSaneamento.recife.esgotamento
+    });
 });
 
 /**
  * @swagger
  * /api/saneamento/residuos:
  *   get:
- *     summary: Dados de resíduos sólidos
+ *     summary: Obter dados de resíduos sólidos
  *     tags: [Saneamento]
- *     security:
- *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados de resíduos sólidos
  */
-router.get('/residuos', authMiddleware, (_req, res) => {
-  res.json({
-    cidade: 'Recife',
-    indicador: 'Resíduos Sólidos',
-    dados: dadosRecife.residuos,
-  });
+router.get('/residuos', (req, res) => {
+    res.json({
+        success: true,
+        data: dadosSaneamento.recife.residuosSolidos
+    });
 });
 
 export default router;

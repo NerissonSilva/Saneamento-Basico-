@@ -1,28 +1,28 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import { authService } from './services/api';
+import './App.css';
+
+function ProtectedRoute({ children }) {
+  return authService.isAuthenticated() ? children : <Navigate to="/login" />;
+}
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token'));
-
-  useEffect(() => {
-    if (token) localStorage.setItem('token', token);
-    else localStorage.removeItem('token');
-  }, [token]);
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/login"
-          element={token ? <Navigate to="/dashboard" /> : <Login onLogin={setToken} />}
-        />
+        <Route path="/login" element={<Login />} />
         <Route
           path="/dashboard"
-          element={token ? <Dashboard onLogout={() => setToken(null)} /> : <Navigate to="/login" />}
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>
   );

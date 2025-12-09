@@ -1,144 +1,156 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { authService, saneamentoService } from '../services/api';
 import './Dashboard.css';
 
-function Dashboard({ onLogout }) {
-  const [dados, setDados] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function Dashboard() {
+    const [user, setUser] = useState(null);
+    const [dados, setDados] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    loadData();
-  }, []);
+    useEffect(() => {
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser) {
+            navigate('/login');
+            return;
+        }
+        setUser(currentUser);
+        loadData();
+    }, [navigate]);
 
-  const loadData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const { data } = await axios.get('/api/saneamento/estatisticas', config);
-      setDados(data);
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao carregar dados');
-    } finally {
-      setLoading(false);
+    const loadData = async () => {
+        try {
+            const response = await saneamentoService.getEstatisticas();
+            setDados(response.data);
+        } catch (err) {
+            setError('Erro ao carregar dados');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = () => {
+        authService.logout();
+        navigate('/login');
+    };
+
+    if (loading) {
+        return (
+            <div className="dashboard-container">
+                <div className="loading">Carregando...</div>
+            </div>
+        );
     }
-  };
 
-  if (loading) return <div className="loading">Carregando dados...</div>;
+    return (
+        <div className="dashboard-container">
+            <header className="dashboard-header">
+                <div className="header-content">
+                    <h1>🚰 Saneamento Recife</h1>
+                    <div className="user-info">
+                        <span>Olá, {user?.name}!</span>
+                        <button onClick={handleLogout} className="logout-button">
+                            Sair
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-  return (
-    <div className="dashboard">
-      <header>
-        <div>
-          <h1>🌊 Saneamento Básico - Recife/PE</h1>
-          <p>
-            Dados de {dados.ano} • População: {dados.populacao.toLocaleString('pt-BR')} habitantes
-          </p>
+            <main className="dashboard-main">
+                {error && <div className="error-banner">{error}</div>}
+
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-icon">👥</div>
+                        <div className="stat-content">
+                            <h3>População</h3>
+                            <p className="stat-value">
+                                {dados?.populacao?.toLocaleString('pt-BR')}
+                            </p>
+                            <span className="stat-label">habitantes</span>
+                        </div>
+                    </div>
+
+                    <div className="stat-card highlight">
+                        <div className="stat-icon">💧</div>
+                        <div className="stat-content">
+                            <h3>Abastecimento de Água</h3>
+                            <p className="stat-value">{dados?.abastecimentoAgua?.cobertura}%</p>
+                            <span className="stat-label">cobertura</span>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">🚿</div>
+                        <div className="stat-content">
+                            <h3>Esgotamento Sanitário</h3>
+                            <p className="stat-value">{dados?.esgotamento?.cobertura}%</p>
+                            <span className="stat-label">cobertura</span>
+                        </div>
+                    </div>
+
+                    <div className="stat-card">
+                        <div className="stat-icon">♻️</div>
+                        <div className="stat-content">
+                            <h3>Coleta de Resíduos</h3>
+                            <p className="stat-value">{dados?.residuosSolidos?.coleta}%</p>
+                            <span className="stat-label">cobertura</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="details-grid">
+                    <div className="detail-card">
+                        <h3>💧 Água - Detalhes</h3>
+                        <div className="detail-items">
+                            <div className="detail-item">
+                                <span>Tratamento:</span>
+                                <strong>{dados?.abastecimentoAgua?.tratamento}%</strong>
+                            </div>
+                            <div className="detail-item">
+                                <span>Perdas:</span>
+                                <strong>{dados?.abastecimentoAgua?.perdas}%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="detail-card">
+                        <h3>🚿 Esgoto - Detalhes</h3>
+                        <div className="detail-items">
+                            <div className="detail-item">
+                                <span>Tratamento:</span>
+                                <strong>{dados?.esgotamento?.tratamento}%</strong>
+                            </div>
+                            <div className="detail-item">
+                                <span>Redes Coletoras:</span>
+                                <strong>{dados?.esgotamento?.redesColetoras} km</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="detail-card">
+                        <h3>♻️ Resíduos - Detalhes</h3>
+                        <div className="detail-items">
+                            <div className="detail-item">
+                                <span>Reciclagem:</span>
+                                <strong>{dados?.residuosSolidos?.reciclagem}%</strong>
+                            </div>
+                            <div className="detail-item">
+                                <span>Destinação Adequada:</span>
+                                <strong>{dados?.residuosSolidos?.destinacaoAdequada}%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer className="dashboard-footer">
+                    <p>Última atualização: {dados?.ultimaAtualizacao}</p>
+                    <p>Sistema de Monitoramento de Saneamento Básico - Recife/PE</p>
+                </footer>
+            </main>
         </div>
-        <button onClick={onLogout}>Sair</button>
-      </header>
-
-      <main>
-        <section className="stats-section">
-          <h2>💧 Abastecimento de Água</h2>
-          <div className="stats-grid">
-            <div className="stat-card blue">
-              <h3>Atendimento</h3>
-              <div className="value">{dados.agua.atendimento}%</div>
-              <p>da população atendida</p>
-            </div>
-            <div className="stat-card blue">
-              <h3>Ligações</h3>
-              <div className="value">{dados.agua.ligacoes.toLocaleString('pt-BR')}</div>
-              <p>ligações ativas</p>
-            </div>
-            <div className="stat-card red">
-              <h3>Perdas</h3>
-              <div className="value">{dados.agua.perdas}%</div>
-              <p>índice de perdas</p>
-            </div>
-            <div className="stat-card blue">
-              <h3>Consumo Médio</h3>
-              <div className="value">{dados.agua.consumoMedio}L</div>
-              <p>por habitante/dia</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="stats-section">
-          <h2>🚰 Esgotamento Sanitário</h2>
-          <div className="stats-grid">
-            <div className="stat-card purple">
-              <h3>Coleta</h3>
-              <div className="value">{dados.esgoto.coleta}%</div>
-              <p>da população atendida</p>
-            </div>
-            <div className="stat-card purple">
-              <h3>Tratamento</h3>
-              <div className="value">{dados.esgoto.tratamento}%</div>
-              <p>do esgoto tratado</p>
-            </div>
-            <div className="stat-card purple">
-              <h3>Ligações</h3>
-              <div className="value">{dados.esgoto.ligacoes.toLocaleString('pt-BR')}</div>
-              <p>ligações ativas</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="stats-section">
-          <h2>♻️ Resíduos Sólidos</h2>
-          <div className="stats-grid">
-            <div className="stat-card green">
-              <h3>Coleta</h3>
-              <div className="value">{dados.residuos.coleta}%</div>
-              <p>da população atendida</p>
-            </div>
-            <div className="stat-card green">
-              <h3>Coleta Seletiva</h3>
-              <div className="value">{dados.residuos.coletaSeletiva}%</div>
-              <p>de cobertura</p>
-            </div>
-            <div className="stat-card green">
-              <h3>Volume Diário</h3>
-              <div className="value">{dados.residuos.toneladas}t</div>
-              <p>toneladas/dia</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="stats-section">
-          <h2>💰 Investimentos ({dados.ano})</h2>
-          <div className="stats-grid">
-            <div className="stat-card orange">
-              <h3>Total</h3>
-              <div className="value">R$ {dados.investimentos.total}M</div>
-              <p>investimento total</p>
-            </div>
-            <div className="stat-card orange">
-              <h3>Água</h3>
-              <div className="value">R$ {dados.investimentos.agua}M</div>
-              <p>em abastecimento</p>
-            </div>
-            <div className="stat-card orange">
-              <h3>Esgoto</h3>
-              <div className="value">R$ {dados.investimentos.esgoto}M</div>
-              <p>em esgotamento</p>
-            </div>
-            <div className="stat-card orange">
-              <h3>Resíduos</h3>
-              <div className="value">R$ {dados.investimentos.residuos}M</div>
-              <p>em coleta</p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer>
-        <p>Fonte: Sistema Nacional de Informações sobre Saneamento (SNIS) - {dados.ano}</p>
-      </footer>
-    </div>
-  );
+    );
 }
-
-export default Dashboard;

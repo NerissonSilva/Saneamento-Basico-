@@ -1,11 +1,12 @@
 services:
+  # Backend API
   - type: web
-    name: recife-saneamento
+    name: recife-saneamento-api
     runtime: node
     plan: free
     rootDir: backend
-    buildCommand: npm install --production=false
-    startCommand: node src/server.js
+    buildCommand: npm install
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -13,4 +14,16 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://recife-saneamento.onrender.com
+        sync: false
+    
+  # Frontend Static Site
+  - type: web
+    name: recife-saneamento-frontend
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
